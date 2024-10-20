@@ -28,7 +28,7 @@ This project is a Symfony-based API for handling payments through various gatewa
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/Ghorbannezhad/metricalo.git
    cd your-repo
 
 2. Set up your environment variables:
