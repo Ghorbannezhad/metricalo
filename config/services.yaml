@@ -1,0 +1,61 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    locale: 'en'
+    app.notifications.email_sender: anonymous@example.com
+    api_base_url: '%env(API_BASE_URL)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            # this allows to define the scalar arguments once and apply them to any services
+            # defined/created in this file; if some argument is used rarely, instead of defining
+            # it here you can use the #[Autowire] attribute to inject it manually in the service constructor
+            array $enabledLocales: '%kernel.enabled_locales%'
+            string $defaultLocale: '%locale%'
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+    App\EventListener\JsonRequestListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 10 }
+
+    App\Service\PaymentGateway\PaymentGatewayService:
+        autowire: true
+        autoconfigure: true
+        arguments:
+            $aciPaymentMode: '%env(ACI_PAYMENT_MODE)%'
+            $shift4PaymentMode: '%env(SHIFT4_PAYMENT_MODE)%'
+    App\Service\PaymentGateway\Aci\AciService:
+        arguments:
+            $apiUrl: '%env(ACI_BASE_URL)%'
+            $authToken: '%env(ACI_BEARER_TOKEN)%'
+    App\Service\PaymentGateway\Aci\AciTestService:
+        arguments:
+            $apiUrl: '%env(ACI_BASE_URL)%'
+            $authToken: '%env(ACI_BEARER_TOKEN)%'
+    App\Service\PaymentGateway\Shift4\Shift4Service:
+        arguments:
+            $apiUrl: '%env(SHIFT4_BASE_URL)%'
+            $username: '%env(SHIFT4_USERNAME)%'
+            $password: '%env(SHIFT4_PASSWORD)%'
+    App\Service\PaymentGateway\Shift4\Shift4TestService:
+        arguments:
+            $apiUrl: '%env(SHIFT4_BASE_URL)%'
+            $username: '%env(SHIFT4_USERNAME)%'
+            $password: '%env(SHIFT4_PASSWORD)%'
+            # $serializer: '@serializer'
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
